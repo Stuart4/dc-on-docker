@@ -56,4 +56,10 @@ then
     su -c 'cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys' vagrant
 fi
 
+# update kernel
+if [ "uname -r" != "4.4.0-24-generic" ]
+then
+    apt-get install --force-yes -y linux-virtual-lts-xenial
+fi
+
 exit 0
