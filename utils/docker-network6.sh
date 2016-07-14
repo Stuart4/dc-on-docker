@@ -25,7 +25,7 @@ create_fabric_networks()
 create_spine_networks()
 {
 	for j in {1..2}; do
-		for i in {1..3}; do
+		for i in {1..4}; do
 			docker network inspect ${net_prefix}${j}${i} > /dev/null
 			if [ $? != 0 ]; then
 				docker network create --internal \
@@ -40,7 +40,7 @@ create_spine_networks()
 # create leaf networks
 create_leaf_networks()
 {
-	for i in 30 40 50; do
+	for i in 30 40 50 60; do
 		docker network inspect ${net_prefix}${i} > /dev/null
 		if [ $? != 0 ]; then
 			docker network create --internal \
@@ -71,6 +71,7 @@ connect_spine_switches()
 			docker network connect ${net_prefix}${i}1 spine${i}
 			docker network connect ${net_prefix}${i}2 spine${i}
 			docker network connect ${net_prefix}${i}3 spine${i}
+			docker network connect ${net_prefix}${i}4 spine${i}
 		fi
 	done
 }
@@ -78,7 +79,7 @@ connect_spine_switches()
 # connect leaf switches
 connect_leaf_switches()
 {
-	for i in {1..3}; do
+	for i in {1..4}; do
 		docker inspect leaf${i} > /dev/null
 		if [ $? = 0 ]; then
 			docker network connect ${net_prefix}1${i} leaf${i}

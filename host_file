@@ -1,6 +1,7 @@
-admin@localhost:10022
-admin@localhost:11022
-admin@localhost:12022
-admin@localhost:13022
-admin@localhost:14022
-admin@localhost:15022
+admin@10.11.12.1:22
+admin@10.11.12.2:22
+admin@10.11.12.3:22
+admin@10.11.12.4:22
+admin@10.11.12.5:22
+admin@10.11.12.6:22
+admin@10.11.12.7:22
