@@ -4,12 +4,14 @@ services:
     build: .
     image: subzerojake/dogcactus
     command: /bin/true
-  fab1:
+  {% for switch in switches -%}
+  {{ switch.name }}:
     image: subzerojake/dogcactus
-    container_name: "fab1"
+    container_name: "{{ switch.name }}"
     privileged: true
     ports:
-      - "10022:22"
+      - "{{ switch.mgmt }}:22"
+      - "{{ switch.rest }}:443"
     volumes:
       - /tmp:/tmp
       - /dev/log:/dev/log
@@ -17,3 +19,4 @@ services:
     networks:
       - default
     command: /sbin/init
+  {% endfor %}

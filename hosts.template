@@ -3,13 +3,9 @@ ansible_host=localhost
 
 [all]
 docker
-fab1   ansible_port=10022
-spine1 ansible_port=11022
-spine2 ansible_port=12022
-leaf1  ansible_port=13022
-leaf2  ansible_port=14022
-leaf3  ansible_port=15022
-leaf4  ansible_port=16022
+{% for switch in switches -%}
+{{ switch.name }} ansible_port={{ switch.mgmt }}
+{% endfor %}
 
 [switches:children]
 fabrics
@@ -17,13 +13,13 @@ spines
 leaves
 
 [fabrics]
-fab1
+fab[1:{{ num_fabs }}]
 
 [spines]
-spine[1:2]
+spine[1:{{ num_spines }}]
 
 [leaves]
-leaf[1:4]
+leaf[1:{{ num_leaves }}]
 
 # Group for the tests/*.yaml playbooks used by both travis CI.
 # You can use the local fab1 switch to run the test as:

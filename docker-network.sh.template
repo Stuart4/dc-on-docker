@@ -1,0 +1,114 @@
+#! /usr/bin/env bash
+
+# Docker picks the default network based on the network name
+# in the alphabetical order.  We put this prefix to all the
+# network names so that those networks won't to be picked
+# as the default networks.
+#
+# https://github.com/docker/docker/issues/21741
+net_prefix="znet_"
+fab_suffix="fab_"
+spine_suffix="spine_"
+leaf_suffix="leaf_"
+
+# create fabric networks
+create_fabric_networks()
+{
+	for i in {0..{{ num_fabs }}}; do
+		docker network inspect ${net_prefix}${i} > /dev/null
+		if [ $? != 0 ]; then
+			docker network create --internal \
+				--subnet=172.16.${i}.0/24 \
+				--gateway=172.16.${i}.254 ${net_prefix}${i}
+		fi
+	done
+}
+
+# create spine networks
+create_spine_networks()
+{
+	for i in {1..{{ num_fabs }}}; do
+		for j in {1..{{ num_spines }}}; do
+			docker network inspect ${net_prefix}${spine_suffix}${i}x${j} > /dev/null
+			if [ $? != 0 ]; then
+				docker network create --internal \
+					--subnet=172.${i}.${j}.0/24 \
+					--gateway=172.${i}.${j}.254 \
+					${net_prefix}${spine_suffix}${i}x${j}
+			fi
+		done
+	done
+}
+
+# create leaf networks
+create_leaf_networks()
+{
+	for i in {1..{{ num_spines}}}; do
+		for j in {1..{{ num_leaves }}}; do
+			docker network inspect ${net_prefix}${leaf_suffix}${i}x${j} > /dev/null
+			if [ $? != 0 ]; then
+				docker network create --internal \
+					--subnet=173.${i}.${j}.0/24 \
+					--gateway=173.${i}.${j}.254 \
+					${net_prefix}${leaf_suffix}${i}x${j}
+			fi
+		done
+	done
+}
+
+# connect fabric switch
+connect_fabric_switches()
+{
+	for i in {1..{{ num_fabs }}}; do
+		for j in {1..{{ num_spines }}}; do
+			docker network inspect ${net_prefix}${spine_suffix}${i}x${j} | grep fab${i} > /dev/null
+			if [ $? != 0 ]; then
+				docker network connect ${net_prefix}${spine_suffix}${i}x${j} fab${i}
+			fi
+		done
+	done
+}
+
+# connect spine switches
+connect_spine_switches()
+{
+	for i in {1..{{ num_fabs }}}; do
+		for j in {1..{{ num_spines }}}; do
+			docker network inspect ${net_prefix}${spine_suffix}${i}x${j} | grep spine${j} > /dev/null
+			if [ $? != 0 ]; then
+				docker network connect ${net_prefix}${spine_suffix}${i}x${j} spine${j}
+			fi
+		done
+	done
+
+	for i in {1..{{ num_spines }}}; do
+		for j in {1..{{ num_leaves }}}; do
+			docker network inspect ${net_prefix}${leaf_suffix}${i}x${j} | grep spine${i} > /dev/null
+			if [ $? != 0 ]; then
+				docker network connect ${net_prefix}${leaf_suffix}${i}x${j} spine${i}
+			fi
+		done
+	done
+}
+
+# connect leaf switches
+connect_leaf_switches()
+{
+	for i in {1..{{ num_spines }}}; do
+		for j in {1..{{ num_leaves }}}; do
+			docker network inspect ${net_prefix}${leaf_suffix}${i}x${j} | grep leaf${j} > /dev/null
+			if [ $? != 0 ]; then
+				docker network connect ${net_prefix}${leaf_suffix}${i}x${j} leaf${j}
+			fi
+		done
+	done
+}
+
+# main
+#create_fabric_networks
+create_spine_networks
+create_leaf_networks
+connect_fabric_switches
+connect_spine_switches
+connect_leaf_switches
+
