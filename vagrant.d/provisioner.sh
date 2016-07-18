@@ -13,6 +13,18 @@ then
     apt-get install --force-yes -y firefox
 fi
 
+# Parallel-SSH
+if [ ! -f "/usr/bin/parallel-ssh" ]
+then
+    apt-get install --force-yes -y pssh
+fi
+
+# NMap
+if [ ! -f "/usr/bin/nmap" ]
+then
+    apt-get install --force-yes -y nmap
+fi
+
 # Docker
 if [ ! -f "/usr/bin/docker" ]
 then
@@ -60,6 +72,7 @@ fi
 if [ "uname -r" != "4.4.0-24-generic" ]
 then
     apt-get install --force-yes -y linux-virtual-lts-xenial
+    echo "Please run: vagrant reload"
 fi
 
 exit 0

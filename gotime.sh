@@ -2,7 +2,6 @@
 
 cd /vagrant
 if [ `docker ps | wc -l` -gt 0 ]; then
-	echo here
 	ansible-playbook utils/teardown.yaml
 fi
 docker network ls | awk '{print $1}' | tail -n +2 | xargs docker network rm > /dev/null
