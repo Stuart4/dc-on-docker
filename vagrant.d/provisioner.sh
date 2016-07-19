@@ -33,6 +33,12 @@ then
     usermod -a -G docker vagrant
 fi
 
+# virtualenv
+if [ ! -f "/usr/bin/virtualenv" ]
+then
+    apt-get install -y python-virtualenv
+fi
+
 # Ansible
 if [ ! -f "/usr/bin/ansible-playbook" ]
 then
